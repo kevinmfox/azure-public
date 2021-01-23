@@ -3,13 +3,8 @@ $defaultGateway = "10.0.1.1"
 
 New-Item -Path "C:\Bootstrap" -ItemType Directory
 
-$webClient = New-Object System.Net.WebClient
-$credCache = New-Object System.Net.CredentialCache
-$creds = New-Object System.Net.NetworkCredential("bootstrap", "6p3bt7u2f2xk3i7o3hw2qfxqmgyvo7h6tqys4nwlggxbf2zkawna")
-$credCache.Add("url", "Basic", $creds)
-$webClient.Credentials = $credCache
-$webClient.DownloadFile(`
-    "https://dev.azure.com/kevinmfox/azure/_apis/sourceProviders/TfsGit/filecontents?repository=PowerShell&path=%2FConfigurations%2F00-DC01Bootstrap.ps1&commitOrBranch=main",`
+(New-Object System.Net.WebClient).DownloadFile(`
+    "https://raw.githubusercontent.com/kevinmfox/azure-public/master/01-DC01Bootstrap.ps1",`
     "C:\Bootstrap\01-DC01Bootstrap.ps1")
 
 New-NetIPAddress -IPAddress $ipAddress -InterfaceAlias Ethernet0 -DefaultGateway $defaultGateway -AddressFamily IPv4 -PrefixLength 24
@@ -24,5 +19,7 @@ Register-ScheduledTask `
         -Argument "C:\Bootstrap\01-DC01Bootstrap.ps1") `
     -Trigger (New-ScheduledTaskTrigger -AtStartup) `
     -Principal (New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest)
+
+Start-Sleep -Seconds 120
 
 Rename-Computer -NewName DC01 -Restart
