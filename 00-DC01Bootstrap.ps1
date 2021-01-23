@@ -4,6 +4,10 @@ $defaultGateway = "192.168.40.1"
 New-Item -Path "C:\Bootstrap" -ItemType Directory
 
 (New-Object System.Net.WebClient).DownloadFile(`
+    "https://raw.githubusercontent.com/kevinmfox/azure-public/master/00-DC01Bootstrap.ps1",`
+    "C:\Bootstrap\00-DC01Bootstrap.ps1")
+
+(New-Object System.Net.WebClient).DownloadFile(`
     "https://raw.githubusercontent.com/kevinmfox/azure-public/master/01-DC01Bootstrap.ps1",`
     "C:\Bootstrap\01-DC01Bootstrap.ps1")
 
