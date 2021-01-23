@@ -1,5 +1,5 @@
-﻿$ipAddress = "10.0.1.200"
-$defaultGateway = "10.0.1.1"
+﻿$ipAddress = "192.168.40.20"
+$defaultGateway = "192.168.40.1"
 
 New-Item -Path "C:\Bootstrap" -ItemType Directory
 
