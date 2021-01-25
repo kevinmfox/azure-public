@@ -1,33 +1,19 @@
-﻿function GeneratePassword([Int]$Length)
-{
-    $chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPRSTUVWXYZ23456789"
-    $password = ""
-    for ($i = 0; $i -lt $Length; $i++)
-    {
-        $password += $chars.ToCharArray() | Get-Random
-    }
-    return $password
-}
+﻿$id = "DC01"
 
 New-Item -Path "C:\Bootstrap" -ItemType Directory
 
 (New-Object System.Net.WebClient).DownloadFile(`
-    "https://raw.githubusercontent.com/kevinmfox/azure-public/master/00-DC01Bootstrap.ps1",`
-    "C:\Bootstrap\01-DC01Bootstrap.ps1")
+    "https://raw.githubusercontent.com/kevinmfox/azure-public/master/00-" + $id + "Bootstrap.ps1",`
+    "C:\Bootstrap\00-" + $id + "Bootstrap.ps1")
 
-Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
+(New-Object System.Net.WebClient).DownloadFile(`
+    "https://raw.githubusercontent.com/kevinmfox/azure-public/master/01-" + $id + "Bootstrap.ps1",`
+    "C:\Bootstrap\01-" + $id + "Bootstrap.ps1")
 
-$safeModePassword = GeneratePassword -Length 32
-
-$safeModePassword | Out-File -FilePath "C:\Bootstrap\SafeMode.txt" -Append:$false -Force
-
-Install-ADDSForest `
-    -SkipPreChecks `
-    -DomainName fox.local `
-    -SafeModeAdministratorPassword (ConvertTo-SecureString -AsPlainText $safeModePassword -Force) `
-    -CreateDnsDelegation:$false `
-    -DomainMode WinThreshold `
-    -DomainNetbiosName FOX `
-    -ForestMode WinThreshold `
-    -InstallDns `
-    -Force
+Register-ScheduledTask `
+    -TaskName ("01" + $id + "Bootstrap") `
+    -Action (New-ScheduledTaskAction `
+        -Execute powershell.exe `
+        -Argument ("C:\Bootstrap\01-" + $id + "Bootstrap.ps1")) `
+    -Trigger (New-ScheduledTaskTrigger -Once -At (Get-Date).AddSeconds(30)) `
+    -Principal (New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount -RunLevel Highest)
